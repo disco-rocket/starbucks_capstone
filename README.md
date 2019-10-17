@@ -4,9 +4,13 @@ Analysing Starbucks promotional data for Udacity Data Science capstone project.
 ### Table of Contents
 
 1. [Installation](#installation)
-2. [Project Motivation](#motivation)
-3. [Data limiations](#data)
-4. [Main Findings](#findings)
+2. [Project Overview](#overview)
+3. [Problem Statement](#problem)
+4. [Metrics](#metrics)
+5. [Data Limiations](#data)
+6. [Model Choices](#choices)
+7. [Main Findings](#findings)
+8. [Conclusions](#conclusions)
 
 ## Installation <a name="installation"></a>
 
@@ -15,22 +19,45 @@ These are pandas (0.23.3), numpy (1.12.1), matplotlib (2.1.0), seaborn (0.9.0), 
 
 Seaborn has to be at least version 0.9.0 to support the scatterplots.
 
-## Project Motivation<a name="motivation"></a>
+## Project Overview<a name="overview"></a>
 
 The purpose of this project was to complete the final assignment in a Udacity Data Science Nano-Degree.
 Data was provided from Starbucks, which is simulated customer, marketing and transaction information.
 I set out to find insights in this data that could increase revenue.
 
+### Problem Statement<a name="problem"></a>
+We want to find ways to maximise revenue by (1) focusing on customers who will respond to promotions, and (2) tailoring promotions that customers will best respond.
+To do this we will focus on the promotions data, and append customer and outcome information to this base data. The effectiveness of each promotion can then be tracked.
+
+### Metrics<a name="metrics"></a>
+There are two target variables that can be derived from the data.
+1. Whether the promotion was followed up with a qualitifying transaction. This will allow us to maximise revenue by focusing on factors that maximise this rate.
+2. Whether the promotion was followed up with a qualifying transactions, despite the promotion not being viewed. This will allow us to identify customer segments that would have made a purchase anyway at full price or without the promotion.
+
+Clustering on the demographic data will be used to see if any of the clusteres are over or underrepresented in the above two populations.
+
+Logistic regression will then be used on the combined demographic and offer data to get the coefficients to see what the major factors are for completeing an offer, and then the accuracy on this model will be used to verify that these coefficients adequatly explain the variance.
+
+This regression will then be repeated on the different demographic groups identified in the clustering to look for differences in the coefficients between the groups.
+
+Finally the accuracy on other models will be looked at, to see if we can explain significantly more variance using techniques that can more accuratly classifiy on non-linear clusters.
+
+Accuracy is chosen as the completion rates are around 37%, so it isn't too unbalanced to skew the results. Also false positives and false negatives are equally important in identifying who to focus resources on, so other metrics such as recall and precision are less important.
+
 ## Data limiations<a name="data"></a>
 
 As this was simulated data, there were a few quirks in the data which you would not expect to see in live Starbucks data. These include:
-* The distribution of ages look to be what you would see at a country population level, not at a customer level. For example There were more members that were over 80, than in the age group 18 to 25.
-* While you would expect to see age correlated with income, in the data there are 3 jumps in the minimum values by age.
+* The distribution of ages look to be what you would see at a country population level, not at a customer level. For example there were more members that were over 80, than in the age group 18 to 25.
+* While you would expect to see age correlated with income, in the data there are 3 jumps in the minimum values by age, which doesn't look organic.
+
+## Model choices<a name="choices"></a>
 
 ## Main Findings<a name="findings"></a>
 
 * There were members where no demographic data was held against them. They showed to be less likely to view and complete an offer, and more likely to get a discount without being influenced by the promotion. We would therefore recommend that costly offers such as discounts or BOGO are not sent to these customers.
 * Social media is the best channel to use, although if there is no extra cost multiple channels can be used. The one exception is younger lower income groups (potentially male and newer members as well) react adversely to mobile advertisements, so an A/B test could be carried out to see if there is a boost by not using that channel for them.
+
+## Conclusions<a name="conclusions"></a>
 
 
 
