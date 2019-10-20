@@ -97,6 +97,9 @@ The main findings were:
 * There were members where no demographic data was held against them. They showed to be less likely to view and complete an offer, and more likely to get a discount without being influenced by the promotion. We would therefore recommend that costly offers such as discounts or BOGO are not sent to these customers.
 * Social media is the best channel to use, although if there is no extra cost multiple channels can be used. The one exception is younger lower income groups (potentially male and newer members as well) react adversely to mobile advertisements, so an A/B test could be carried out to see if there is a boost by not using that channel for them.
 
+Without having information on the cost of the promotions to Starbucks it was not possible to look to maximise profitability.
+Further work could be done if that information were to be provided
+
 
 
 
