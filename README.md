@@ -40,6 +40,8 @@ The purpose of this project was to complete the final assignment in a Udacity Da
 Data was provided by Starbucks, which is simulated customer, marketing and transaction information.
 I set out to find insights in this data that could increase revenue.
 
+An article further discussing the analysis was published in [Medium](https://medium.com/@sheffseankiely/what-simulated-starbucks-data-tells-us-about-marketing-8d5097858cc2?sk=04b9d9b99967dfea2676f9673ffd7bdc):
+
 ### Problem Statement<a name="problem"></a>
 We want to find ways to maximise revenue by (1) focusing on customers who will respond to promotions, and (2) focusing on promotions that customers will best respond.
 To do this we will focus on the promotions data, and append customer and outcome information to this base data. The effectiveness of each promotion can then be tracked.
