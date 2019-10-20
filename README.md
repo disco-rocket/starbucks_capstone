@@ -42,6 +42,9 @@ I set out to find insights in this data that could increase revenue.
 
 An article further discussing the analysis was published in [Medium](https://medium.com/@sheffseankiely/what-simulated-starbucks-data-tells-us-about-marketing-8d5097858cc2?sk=04b9d9b99967dfea2676f9673ffd7bdc):
 
+Implicit consent to use the data was given for the nano-degree course, but there is no known permission to use the data beyond this use.
+The data is simulated, so no real world conclusions should be drawn from either the results or data.
+
 ### Problem Statement<a name="problem"></a>
 We want to find ways to maximise revenue by (1) focusing on customers who will respond to promotions, and (2) focusing on promotions that customers will best respond.
 To do this we will focus on the promotions data, and append customer and outcome information to this base data. The effectiveness of each promotion can then be tracked.
