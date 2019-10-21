@@ -6,8 +6,8 @@ Analysing Starbucks promotional data for Udacity Data Science capstone project.
 1. [Installation](#installation)
 2. [Project Overview](#overview)
 3. [Problem Statement](#problem)
-4. [Metrics](#metrics)
-5. [Data Limiations](#data)
+4. [Data Limiations](#data)
+5. [Metrics](#metrics)
 6. [Model Choices](#choices)
 7. [Conclusions](#conclusions)
 
@@ -36,6 +36,8 @@ Seaborn has to be at least version 0.9.0 to support the scatterplots.
 
 ## Project Overview<a name="overview"></a>
 
+Starbucks is one of the largest retailers in coffee in the world, with [89% of revenue coming from the 18 to 40 demographic](https://brandongaille.com/30-curious-starbucks-demographics/).
+
 The purpose of this project was to complete the final assignment in a Udacity Data Science Nano-Degree.
 Data was provided by Starbucks, which is simulated customer, marketing and transaction information.
 I set out to find insights in this data that could increase revenue.
@@ -48,6 +50,37 @@ The data is simulated, so no real world conclusions should be drawn from either 
 ### Problem Statement<a name="problem"></a>
 We want to find ways to maximise revenue by (1) focusing on customers who will respond to promotions, and (2) focusing on promotions that customers will best respond.
 To do this we will focus on the promotions data, and append customer and outcome information to this base data. The effectiveness of each promotion can then be tracked.
+The solution approach will be to
+* Use clustering to seperate the customers into different populations to analyse
+* Look at the propotion of completions, both where the offer was viewed or not, for each identified cluster. This will give an indication of what customer demographics may be the best focus of offers
+* Create a model to analyse both demographic and offer data at the same time, to see what gives the most impact for completions
+* Create seperate models on just the offer metrics for each of the clusters. This will give an indication of what is most important to different customer groups.
+
+## Data Abnormalities<a name="data"></a>
+
+There are 12.8% of the members where the demographic details were missing. These were null for gender and income, and the missing values for ages were encoded as 118.
+
+As this was simulated data, there were a few quirks in the data which you would not expect to see in live Starbucks data. These include:
+* The distribution of ages look to be what you would see at a country population level, not at a customer level. For example there were more members that were over 80, than in the age group 18 to 25.
+* While you would expect to see age correlated with income, in the data there are 3 jumps in the minimum values by age, which doesn't look organic.
+
+### Preprocessing
+
+The field for the date of membership is an integer stored in yyyymmdd format. As dd will only go up to a maximum of 31, and mm will go up to a maximum of 12, it cannot be scaled in the normal way. In order to get around this a new field was created which was the number of days from the date that the first member was created. This date can then be scaled in the normal way.
+
+The transcript data contains information on the offer received, offer viewed, offer completed and transactions in one table. The attributes against each event is stored in a single column called value. 
+This contains a dictionary with keys of 'reward' and 'offer_id' for 'offer completed' events, 'offer id' (without the underscore) for  'offer received' and 'offer viewed', and finaly 'amount' for 'transaction' events.
+
+The offer received data was extracted from the transcript data, and the offer viewed data merged on using the 'offer id' and 'person'.
+This resulting dataframe has the time (in hours from the start of the first offer) of both the offer recieved and viewed, as well as the duration (in days) that the offer is considered valid.
+These fields are used to restrict down the dataframe from where the viewing was after the offer was sent, but the viewing occured before the offer had expired. Finally this creates a binary flag for whether the offer was used or not.
+
+This process was repeated to get a flag for the completed data.
+
+The final flag was taken by combining the completed flag, with the viewed flag to get where the offer was both viewed and completed. It was also used to create another binary flag for where the offer was completed but not viewed.
+
+### Complications
+* The seaborn package that deals with scatter plots is only in version 0.9.0. I therefore had to add a bit at the start of the code to make sure the Conda environment had the latest version.
 
 ### Metrics<a name="metrics"></a>
 There are two target that will be derived from the data.
@@ -65,12 +98,6 @@ This regression will then be repeated on the different demographic groups identi
 Finally the accuracy on other models will be looked at, to see if we can explain significantly more variance using techniques that can more accuratly classifiy on non-linear clusters.
 
 Accuracy is chosen as the completion rates are around 37%, so it isn't too unbalanced to skew the results. Also false positives and false negatives are equally important in identifying who to focus resources on, so other metrics such as recall and precision are less important.
-
-## Data limiations<a name="data"></a>
-
-As this was simulated data, there were a few quirks in the data which you would not expect to see in live Starbucks data. These include:
-* The distribution of ages look to be what you would see at a country population level, not at a customer level. For example there were more members that were over 80, than in the age group 18 to 25.
-* While you would expect to see age correlated with income, in the data there are 3 jumps in the minimum values by age, which doesn't look organic.
 
 ## Model choices<a name="choices"></a>
 Transforming become_member_on to days_from_first_member
@@ -94,9 +121,11 @@ The accuracy on the test data was 75.38%
 #### Random Forest Classifier
 This is similar to Adaboost (it uses the same base classifier), but is a slightly different algorythm.
 The accuracy on the test data is almost the same, but slightly below Adaboost at 75.35%
-#### Tuning Adaboost.
+
+## Refinements
 Gridsearch was used to maximise the accuracy on the training dataset, which returned an accuracy on the test data of 77.28%. Although this is an improvement, its not big enough of an improvement over logistic regression to suggest that the insights from the coeeficient aren't correct. 
 Further work could have been done to look for over-fitting by comparing the accuracy of the training and test data, but since we are just looking to validate the logistic regression approach, this won't add anything further to the analysis.
+
 ## Conclusions<a name="conclusions"></a>
 The main findings were:
 * There were members where no demographic data was held against them. They showed to be less likely to view and complete an offer, and more likely to get a discount without being influenced by the promotion. We would therefore recommend that costly offers such as discounts or BOGO are not sent to these customers.
