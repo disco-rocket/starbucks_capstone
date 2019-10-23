@@ -6,10 +6,12 @@ Analysing Starbucks promotional data for Udacity Data Science capstone project.
 1. [Installation](#installation)
 2. [Project Overview](#overview)
 3. [Problem Statement](#problem)
-4. [Data Limiations](#data)
-5. [Metrics](#metrics)
-6. [Model Choices](#choices)
-7. [Conclusions](#conclusions)
+4. [Data Abnormalities](#data)
+5. [Preprocessing](#pre)
+6. [Metrics](#metrics)
+7. [Model Choices](#choices)
+8. [Conclusions](#conclusions)
+9. [Improvements](#improvements)
 
 ### File structure
 
@@ -47,7 +49,7 @@ An article further discussing the analysis was published in [Medium](https://med
 Implicit consent to use the data was given for the nano-degree course, but there is no known permission to use the data beyond this use.
 The data is simulated, so no real world conclusions should be drawn from either the results or data.
 
-### Problem Statement<a name="problem"></a>
+## Problem Statement<a name="problem"></a>
 We want to find ways to maximise revenue by (1) focusing on customers who will respond to promotions, and (2) focusing on promotions that customers will best respond.
 To do this we will focus on the promotions data, and append customer and outcome information to this base data. The effectiveness of each promotion can then be tracked.
 The solution approach will be to
@@ -64,7 +66,7 @@ As this was simulated data, there were a few quirks in the data which you would 
 * The distribution of ages look to be what you would see at a country population level, not at a customer level. For example there were more members that were over 80, than in the age group 18 to 25.
 * While you would expect to see age correlated with income, in the data there are 3 jumps in the minimum values by age, which doesn't look organic.
 
-### Preprocessing
+## Preprocessing<a name="pre"></a>
 
 The field for the date of membership is an integer stored in yyyymmdd format. As dd will only go up to a maximum of 31, and mm will go up to a maximum of 12, it cannot be scaled in the normal way. In order to get around this a new field was created which was the number of days from the date that the first member was created. This date can then be scaled in the normal way.
 
@@ -82,7 +84,7 @@ The final flag was taken by combining the completed flag, with the viewed flag t
 ### Complications
 * The seaborn package that deals with scatter plots is only in version 0.9.0. I therefore had to add a bit at the start of the code to make sure the Conda environment had the latest version.
 
-### Metrics<a name="metrics"></a>
+## Metrics<a name="metrics"></a>
 There are two target that will be derived from the data.
 1. Whether the promotion was followed up with a qualitifying transaction. This will allow us to maximise revenue by focusing on factors that maximise this rate.
 2. Whether the promotion was followed up with a qualifying transactions, despite the promotion not being viewed. This will allow us to identify customer segments that would have made a purchase anyway at full price or without the promotion.
@@ -101,38 +103,47 @@ Accuracy is chosen as the completion rates are around 37%, so it isn't too unbal
 
 ## Model choices<a name="choices"></a>
 Transforming become_member_on to days_from_first_member
-#### Changing gender variable to binary type
+### Changing gender variable to binary type
 There was male, female, then a small proportion of others. If we hot encoded it then it may cause issues with multi-colinearity, and because male is the biggest group, adding other to it shouldn't skew it too much.
-#### MinMaxScaler
+### MinMaxScaler
 MinMaxScaler was chosen because it will keep values between 0 and 1, which will match with the binary variables.
 More accurate classifications could have been achieved using StandardScaler, but as we are looking for insights instead of high accuracy MinMaxScaler is good.
-#### imputation
+### imputation
 Imputation was not used, because the completion rates were almost 4 times higher in the population with nulls than without nulls. They were therefore analysed seperatly instead.
-#### kmeans
+### kmeans
 Kmeans was chosen because it effectivly splits up the data into groups, even where the data does not have clear clusters (unlike algorthyms that are better with clearly distinct data like dbscan or MeanShift).
 It is also very efficient (especially with MiniBatchKmeans), so it runs faster than algorythms like AffinityPropagation.
-#### logistic regression
+### logistic regression
 Logistic regression was chosen because the coefficients it creates give insights around the scale of impact of each variable (they are the log of the odds).
 It does well with data where the impact of the dimensions is roughly linear, but it will not do well if the data has dimensions that have pockets of impact (for example if ages 40 to 50 are more prone to purchasing than the other ages). To get around this, other models were used to see how much the accuracy could be improved - big improvements in accuracy could be indicative of such pockets.
-The accuracy on the test data was 73.2%
-#### Adaboost Classifier
+The accuracy was 73.4% (+/- 0.5%) on the training dataset (using cross validation), and 73.2% on the testing dataset
+### Adaboost Classifier
 This was chosen because it is relatively quick to run (compared with more complex models such as SVC), but it will handle pockets of insights better than logistic regression.
 The accuracy on the test data was 75.38%
-#### Random Forest Classifier
+Training accuracy of 75.6% (+/- 0.5), and a test accuracy of 75.4%
+### Random Forest Classifier
 This is similar to Adaboost (it uses the same base classifier), but is a slightly different algorythm.
-The accuracy on the test data is almost the same, but slightly below Adaboost at 75.35%
+The accuracy on the training data was 75.5% (+/- 1.1), and a test accuracy of 75.4%.
+### Refinements
+Adaboost had less variability and a higher training score, so that was then optimised using GridSearchCV. The parameters looked at were learning rate (0.1, 0.5, 1, 5, 10), n_estimators (10, 50, 100) and 3 different base estimators (all decision trees, but with max depths of 1, 2 and 3). The best model was where the learning rate was 0.1 and 100 estimators with a maximum depth of 3. This boosted the accuracy on the training data of 77.00% (+/- 0.5%), and an accuracy on the test data of 77.28%.
 
-## Refinements
-Gridsearch was used to maximise the accuracy on the training dataset, which returned an accuracy on the test data of 77.28%. Although this is an improvement, its not big enough of an improvement over logistic regression to suggest that the insights from the coeeficient aren't correct. 
-Further work could have been done to look for over-fitting by comparing the accuracy of the training and test data, but since we are just looking to validate the logistic regression approach, this won't add anything further to the analysis.
+This refinement tells us that there may be pockets of insights which logistic regression didn't highlight, but the increase isn't big enough to invalidate the insights gleaned from the coefficients.
 
 ## Conclusions<a name="conclusions"></a>
-The main findings were:
-* There were members where no demographic data was held against them. They showed to be less likely to view and complete an offer, and more likely to get a discount without being influenced by the promotion. We would therefore recommend that costly offers such as discounts or BOGO are not sent to these customers.
-* Social media is the best channel to use, although if there is no extra cost multiple channels can be used. The one exception is younger lower income groups (potentially male and newer members as well) react adversely to mobile advertisements, so an A/B test could be carried out to see if there is a boost by not using that channel for them.
 
-Without having information on the cost of the promotions to Starbucks it was not possible to look to maximise profitability.
-Further work could be done if that information were to be provided
+* The first step we went through was clustering the demographic information, which resulted in 6 clusters to work from. A 7th cluster was added where there was no demographic data present.
+* Where there as no data present (segment 7), they had lower representations in the completed and viewed population, ann higher representation in the completed and not viewed population. We would therefore recommend that costly offers such as discounts or BOGO are not sent to these customers.
+* When using logistic regression on both the demographic and offer data, by far the biggest impact was the type of offer (holding all other factors constant, an informational offer would decrease the chance of completeing by 99.7%, compared with a discount which would increase it by around 7 times. The biggest demographic impact was the income, and the longer a customer had been a member the more likely they are to complete.
+* Most of the clusters got similar regression values, with the main exception of group 4 (younger male, lower income) who reacted negatively instead of positively to mobile advertisements.
+
+Ultimatly this was on simulated data, which did show in some of the scatter plots. It would be more interesting to try this on real world data, which would also add more depth to the reccomendations. 
+It was however interesting how the different models generalised well to the test data, even though the test data contained recent data with (in theory) a different mix of customers.
+
+## Improvements<a name="improvements"></a>
+* Fairly simple clustering and supervised learning algorythms were used. We could try more complex and resource intensive models such as SVM for supervised learning, and dbscan for clustering. This could have provided more accurate clusters and models, but would have taken more time to run (especially when optimising using gridsearch).
+* For the ensemble methods, we could dive into the resulting base esimators to try to find more granular insights such as age pockets that react differently. This contrasts with our method which will only give insights on the impact of the size of variables instead of groupings.
+* A/B tests could be conducted to confirm some of our conclusions. This would be good because the current design, where multiple features are correlated risks making the models less accurate due to multicollinearity.
+
 
 
 
